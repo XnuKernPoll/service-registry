@@ -1,2 +1,0 @@
-type service = {address: string; port: int32; ts: float; id: string}
-                

@@ -15,7 +15,7 @@ end
 
 (*server_set DataType Ops*)       
 module ServerSet: sig
-  (*include Irmin.Contents.S*)
+  include Irmin.Contents.S
   val lookup: server_set -> string -> service option 
   val rm_service: server_set -> string -> server_set
   val add_service: server_set-> service -> server_set
