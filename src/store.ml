@@ -34,6 +34,8 @@ module ServerSet = struct
             
   let pp = Irmin.Type.pp_json server_set_t
   let of_string s = Irmin.Type.decode_json server_set_t (Jsonm.decoder (`String s))
+
+  let merge = Irmin.Merge.default (server_set_t) |> Irmin.Merge.option
                                             
   let filter_id ss id =
     List.filter (fun x -> x.id == id) ss
