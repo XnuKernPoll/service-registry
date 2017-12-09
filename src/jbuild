@@ -4,5 +4,5 @@
  ((name service_registry)
   (public_name service-registry)
   (synopsis  "A registry for service discovery")
-  (libraries (irmin-unix)))
+  (libraries (batteries irmin-unix)))
 )

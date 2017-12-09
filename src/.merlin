@@ -2,6 +2,7 @@ B ../_build/default/src
 FLG -open Service_registry -w -40
 PKG astring
 PKG base64
+PKG batteries
 PKG bigarray
 PKG bytes
 PKG cohttp
@@ -35,6 +36,8 @@ PKG lwt.unix
 PKG magic-mime
 PKG mstruct
 PKG nocrypto
+PKG num
+PKG num.core
 PKG ocamlgraph
 PKG ocplib-endian
 PKG ocplib-endian.bigstring
@@ -44,7 +47,10 @@ PKG re.posix
 PKG re.str
 PKG result
 PKG sexplib
+PKG str
 PKG stringext
+PKG threads
+PKG threads.posix
 PKG uchar
 PKG unix
 PKG uri
