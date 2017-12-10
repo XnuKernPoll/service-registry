@@ -1,0 +1,9 @@
+open Model 
+
+val lookup: DataStore.t -> string -> string -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t
+
+val register: DataStore.t -> string -> service -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t
+
+                                                 
+val leave: DataStore.t -> string -> string -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t
+                                                

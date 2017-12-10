@@ -16,21 +16,18 @@ end
 (*server_set DataType Ops*)       
 module ServerSet: sig
   include Irmin.Contents.S
-  val lookup: server_set -> string -> service option 
-  val rm_service: server_set -> string -> server_set
-  val add_service: server_set-> service -> server_set
-  val rm_stale: server_set -> float -> server_set
-  val update_service: server_set -> service -> server_set
+  val lookup: t -> string -> service option 
+  val rm_service: t -> string -> t
+  val add_service: t-> service -> t
+  val rm_stale: t -> float -> t
+  val update_service: t -> service -> t
+  val zero: t
+              
 end 
 
-module DataStore: Irmin.S with type contents = ServerSet.t 
+
 
 
 
                          
-                                                                              
-(*store ops*)       
-val lookup: DataStore.t -> string -> string -> (service option) Lwt.t 
-val update_service: DataStore.t -> string -> service -> string Lwt.t
-val rm_service: DataStore.t -> string -> string -> string Lwt.t
-val rm_stale: DataStore.t -> string -> float -> server_set Lwt.t
+                                                      
