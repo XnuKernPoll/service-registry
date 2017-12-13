@@ -29,7 +29,8 @@ let create_server_set t ssid =
   DB.mk_server_set t ssid >>= fun rep -> ok_rep rep
                                                 
 let remove_server_set t ssid =
-  DB.rm_server_set t ssid >>= fun rep -> ok_rep rep                                               
+  DB.rm_server_set t ssid >>= fun rep -> ok_rep rep
+                                                
 let list_services t ssid =
   DB.list_members t ssid >>= fun members ->
   let body = Fmt.strf "%a\n" (ServerSet.pp) members in
