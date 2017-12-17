@@ -1,4 +1,4 @@
-B ../_build/default/src
+B ../_build/default/lib
 FLG -open Service_registry -w -40
 PKG astring
 PKG base
