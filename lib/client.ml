@@ -63,7 +63,7 @@ let register addr ssid ?interval:(i=25.0) svc =
   let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(ss_path ssid) () in
   let payload = Fmt.strf "%a\n" (Irmin.Type.pp_json service_t) svc in
   let body = Cohttp_lwt_body.of_string payload in
-  Client.post ~body:body url >>= fun (rep, body) -> beat_proc addr ssid svc.id i
+  Client.post ~body:body url >|= fun (rep, body) -> Lwt.async ( fun () -> beat_proc addr ssid svc.id i)
                                        
   
 let create_server_set addr ssid =
