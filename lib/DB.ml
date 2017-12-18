@@ -99,5 +99,17 @@ let rm_stale t ssid max =
   | None -> Lwt.return (ServerSet.zero)
               
        
-       
-  
+
+let refresh t ssid id =
+  let path = cat_path ssid in
+  DataStore.find t path >>= fun ssopt ->
+  let refresh = BatOption.bind ssopt (fun ss -> ServerSet.refresh ss id) in
+  match (ssopt, refresh) with
+  | (None, _) -> Lwt.fail_with ( Fmt.strf "no such server set as %s" ssid)
+  | (Some x, None) -> Lwt.fail_with (Fmt.strf "no such sid as %s" id)
+  | (Some ss , Some svc) ->
+     let nss = ServerSet.update_service ss svc in
+     DataStore.set t ~info:(write_event ssid) path nss >>= fun () ->
+     let rep = Fmt.strf "service %s was refreshed" id in
+     Lwt.return rep 
+     

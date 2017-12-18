@@ -63,6 +63,6 @@ let basic_handler t conn req body =
   | (`POST, ["catalog"; ssid]) ->
      Cohttp_lwt_body.to_string body >>= fun s ->
      let o = Irmin.Type.decode_json service_t (Jsonm.decoder (`String s) ) |> res_opt  in
-     continue_if_deserialized o (register t ssid) 
+     continue_if_deserialized o (register t ssid)
      
   

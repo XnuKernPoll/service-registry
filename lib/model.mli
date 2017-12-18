@@ -21,8 +21,8 @@ module ServerSet: sig
   val add_service: t-> service -> t
   val rm_stale: t -> float -> t
   val update_service: t -> service -> t
-  val zero: t
-              
+  val refresh: t -> string -> service option                             
+  val zero: t              
 end 
 
 

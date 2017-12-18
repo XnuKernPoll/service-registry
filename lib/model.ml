@@ -1,4 +1,6 @@
 open Lwt.Infix
+open Batteries
+       
 
  
 type service = {address: string; port: int32; ts: float; id: string}
@@ -71,6 +73,11 @@ module ServerSet = struct
     rmss @ [svc]
 
   let zero = []
+
+  let refresh t ssid =
+    let svco = lookup t ssid in
+    BatOption.map (fun svc -> {svc with ts = Unix.time () }) svco 
+              
                
     
 end
