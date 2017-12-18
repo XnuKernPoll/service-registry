@@ -23,5 +23,11 @@ val create_server_set: DataStore.t -> string -> (Cohttp.Response.t * Cohttp_lwt_
 val remove_server_set: DataStore.t -> string -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t
                                                  
 val list_services: DataStore.t -> string -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t
+                                                                                    
+val handle_beat: DataStore.t -> string -> string -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t 
+                                                   
 
 val basic_handler: DataStore.t -> Cohttp_lwt_unix.Server.conn -> Cohttp.Request.t -> Cohttp_lwt_body.t -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t
+
+
+                                                                   
