@@ -2,7 +2,7 @@ open Cohttp_lwt
 open Cohttp_lwt_unix
 open Lwt.Infix
 open Model
-       
+
 module DataStore = DB.DataStore
                      
 let res_opt r =
