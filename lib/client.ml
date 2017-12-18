@@ -24,6 +24,21 @@ let ss_path ssid =
 let svc_path ssid id =
   Fmt.strf "catalog/%s/%s" ssid id
 
+
+let send_beat addr ssid id =
+  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(svc_path ssid id) () in
+  Client.post url >>= fun (rep, body) ->
+  match Response.status rep with
+  | `OK -> Lwt.return_unit
+  | `Not_found ->
+     Cohttp_lwt_body.to_string body >>= fun msg ->
+     Lwt.fail_with msg
+  | _ -> Lwt.fail_with "unknown failure"
+
+
+let rec beat_proc addr ssid id i =
+  Lwt_unix.sleep i >>= fun () -> send_beat addr ssid id
+  >>= fun () -> beat_proc addr ssid id i                                                                                                   
              
 let lookup addr ssid id =
   let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(svc_path ssid id) () in
@@ -44,11 +59,11 @@ let leave addr ssid id =
   Client.delete url >>= fun (rep, body) -> Lwt.return () 
 
                 
-let register addr ssid svc =
+let register addr ssid ?interval:(i=25.0) svc =
   let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(ss_path ssid) () in
   let payload = Fmt.strf "%a\n" (Irmin.Type.pp_json service_t) svc in
   let body = Cohttp_lwt_body.of_string payload in
-  Client.post ~body:body url >|= fun (rep, body) -> ()
+  Client.post ~body:body url >>= fun (rep, body) -> beat_proc addr ssid svc.id i
                                        
   
 let create_server_set addr ssid =
@@ -60,18 +75,5 @@ let remove_server_set addr ssid =
   let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(ss_path ssid) () in
   Client.delete url >|= fun (rep, body) -> ()    
    
-let send_beat addr ssid id =
-  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(svc_path ssid id) () in
-  Client.post url >>= fun (rep, body) ->
-  match Response.status rep with
-  | `OK -> Lwt.return_unit
-  | `Not_found ->
-     Cohttp_lwt_body.to_string body >>= fun msg ->
-     Lwt.fail_with msg
-  | _ -> Lwt.fail_with "unknown failure"
 
-
-let rec beat_proc addr ssid id ?interval:(i=25.0) =
-  Lwt_unix.sleep i >>= fun () -> send_beat addr ssid id
-  >>= fun () -> beat_proc addr ssid ~interval:i id                                                                                                   
                                           
