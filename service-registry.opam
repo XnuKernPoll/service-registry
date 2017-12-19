@@ -15,4 +15,5 @@ depends: [
   "jbuilder" {build}
   "irmin-unix"
   "batteries"
+  "cmdliner"
 ]
