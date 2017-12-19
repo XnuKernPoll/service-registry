@@ -9,6 +9,7 @@ PKG base64
 PKG batteries
 PKG bigarray
 PKG bytes
+<<<<<<< HEAD
 PKG cmdliner
 PKG cohttp
 PKG cohttp.lwt
@@ -16,6 +17,15 @@ PKG cohttp.lwt-core
 PKG conduit
 PKG conduit.lwt
 PKG conduit.lwt-unix
+=======
+PKG calendar
+PKG cohttp
+PKG cohttp-lwt
+PKG cohttp-lwt-unix
+PKG conduit
+PKG conduit-lwt
+PKG conduit-lwt-unix
+>>>>>>> 855cb6979bba5d9143239544cb43e188e7cd9332
 PKG cstruct
 PKG decompress
 PKG dispatch
@@ -35,6 +45,10 @@ PKG irmin-unix
 PKG irmin-watcher
 PKG jsonm
 PKG logs
+<<<<<<< HEAD
+=======
+PKG logs.lwt
+>>>>>>> 855cb6979bba5d9143239544cb43e188e7cd9332
 PKG lwt
 PKG lwt.log
 PKG lwt.unix
