@@ -1,8 +1,0 @@
-(jbuild_version 1)
-
-(library
- ((name service_registry)
-  (public_name service-registry)
-  (synopsis  "A registry for service discovery")
-  (libraries (batteries irmin-unix)))
-)
