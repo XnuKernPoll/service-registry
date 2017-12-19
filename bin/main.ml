@@ -40,21 +40,20 @@ let root =
 let server t =
   Server.make ~callback:(fun conn req body -> Service.basic_handler t conn req body) () 
                               
-let start root port =
+let start root port = 
   let conf = config root in
   DataStore.Repo.v conf >>= DataStore.master >>= fun t ->
   Server.create ~mode:(`TCP (`Port 6423)) (server t)
-    
-    
-let _ = print_endline "hello"
 
-open Cohttp_lwt_unix      
+let start_s root port =
+  Lwt_main.run (start root port)
+                        
+let start_t =
+  Term.(const start_s $ root $ port )
 
-let config = Irmin_git.config ~bare:true "/tmp/service_registry"
-                              
-let start =
-  DataStore.Repo.v config >>= DataStore.master >>= fun t -> 
-  Server.create ~mode:(`TCP (`Port 6423)) (Server.make ~callback:(fun conn req body -> Service.basic_handler t conn req body) () ) 
+let info =
+  let doc = "A simple service discovery service" in
+  let man = [`S Manpage.s_bugs; `P "To report bugs contact me at flatmapds@gmail.com"] in
+  Term.info "service-registry" ~version:"%‌%VERSION%%" ~doc ~exits:Term.default_exits ~man
     
-let _ = Lwt_main.run start 
-
+let _ = Term.exit @@ Term.eval (start_t, info)
