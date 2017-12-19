@@ -1,4 +1,4 @@
 (executable
  ((name main)
   (public_name service-registry)
-  (libraries  (service-registry))))
+  (libraries  (service-registry cmdliner))))

@@ -1,6 +1,5 @@
-B ../_build/default/bin
 B ../_build/default/lib
-FLG -w -40
+FLG -open Service_registry -w -40
 PKG astring
 PKG base
 PKG base.caml
@@ -9,13 +8,13 @@ PKG base64
 PKG batteries
 PKG bigarray
 PKG bytes
-PKG cmdliner
+PKG calendar
 PKG cohttp
-PKG cohttp.lwt
-PKG cohttp.lwt-core
+PKG cohttp-lwt
+PKG cohttp-lwt-unix
 PKG conduit
-PKG conduit.lwt
-PKG conduit.lwt-unix
+PKG conduit-lwt
+PKG conduit-lwt-unix
 PKG cstruct
 PKG decompress
 PKG dispatch
@@ -35,6 +34,7 @@ PKG irmin-unix
 PKG irmin-watcher
 PKG jsonm
 PKG logs
+PKG logs.lwt
 PKG lwt
 PKG lwt.log
 PKG lwt.unix
@@ -64,4 +64,3 @@ PKG uri.services
 PKG uutf
 PKG webmachine
 PKG zarith
-S ../lib

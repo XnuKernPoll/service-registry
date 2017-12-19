@@ -8,13 +8,12 @@ PKG base64
 PKG batteries
 PKG bigarray
 PKG bytes
-PKG calendar
 PKG cohttp
-PKG cohttp-lwt
-PKG cohttp-lwt-unix
+PKG cohttp.lwt
+PKG cohttp.lwt-core
 PKG conduit
-PKG conduit-lwt
-PKG conduit-lwt-unix
+PKG conduit.lwt
+PKG conduit.lwt-unix
 PKG cstruct
 PKG decompress
 PKG dispatch
@@ -34,7 +33,6 @@ PKG irmin-unix
 PKG irmin-watcher
 PKG jsonm
 PKG logs
-PKG logs.lwt
 PKG lwt
 PKG lwt.log
 PKG lwt.unix
