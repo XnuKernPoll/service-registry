@@ -43,7 +43,7 @@ let server t =
 let start root port = 
   let conf = config root in
   DataStore.Repo.v conf >>= DataStore.master >>= fun t ->
-  Server.create ~mode:(`TCP (`Port 6423)) (server t)
+  Server.create ~mode:(`TCP (`Port port)) (server t)
 
 let start_s root port =
   Lwt_main.run (start root port)
