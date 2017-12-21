@@ -1,7 +1,8 @@
 open Model
        
 module DataStore: Irmin.S with type contents = ServerSet.t
-(*store ops*)       
+(*store ops*)
+val cat_path: string -> DataStore.key                            
 val list_members: DataStore.t -> string -> ServerSet.t Lwt.t
 val rm_server_set: DataStore.t -> string -> string Lwt.t
 val mk_server_set: DataStore.t -> string -> string Lwt.t

@@ -30,13 +30,13 @@ let send_to_watchers watches ssid rep  =
 (*will remove the printing after testing*)                   
 let callback watches ssid diff =
   match diff with
-  | `Added v ->
+  | `Added (_, `Contents (v,_ ) ) ->
      print_endline "Added";
      print_ss v;
      reply_with_ss v >>= fun rep -> 
      send_to_watchers watches ssid rep
                       
-  | `Updated (_, v) ->
+  | `Updated (_, (_, `Contents (v, _) ) ) ->
      print_endline "updated";
      print_ss v;
      reply_with_ss v >>= fun rep -> 
@@ -46,5 +46,23 @@ let callback watches ssid diff =
      let msg = Fmt.strf "server set %s was deleted" ssid in
      Server.respond_string ~status:`OK ~body:msg () >>= fun rep ->
      send_to_watchers watches ssid rep
+
+  | _ -> Lwt.return_unit
                  
 
+let register_watch t ssid watches =
+  Lwt_mutex.lock watches.mu  >>= fun () -> 
+  Hashtbl.replace watches.tbl ssid [];
+  Lwt.return ( Lwt_mutex.unlock watches.mu ) >>= fun () ->
+  DataStore.watch_key t (DB.cat_path ssid) (
+      fun diff -> callback watches ssid diff
+    )
+
+let add_watcher watches ssid =
+  let s = Lwt.wait () in
+  let w = Hashtbl.find watches.tbl ssid in
+  let nw = w @ [s] in
+  Lwt_mutex.lock watches.mu >>= fun () ->
+  Hashtbl.replace watches.tbl ssid nw;
+  Lwt.return (Lwt_mutex.unlock watches.mu)
+    
