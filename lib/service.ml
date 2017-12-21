@@ -70,7 +70,7 @@ let continue_if_deserialized o f =
   | Some x -> f x 
   | None ->
      Server.respond_string ~status:`Bad_request ~body:"unable to unmarshal data" ()
-  
+
 
 let basic_handler t conn req body =
   let path = Request.uri (req)  |> Uri.path |> path_split in
