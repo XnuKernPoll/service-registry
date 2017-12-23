@@ -24,6 +24,13 @@ module Service = struct
   type t = service
              
   let t = service_t
+
+  let make host port =
+    let uuid = Uuidm.to_string (Uuidm.v `V4) in 
+    {address = host; port = Int32.of_int port; ts = Unix.time (); id = uuid}
+
+  let make host port uuid =
+    {address = host; port = Int32.of_int port; ts = Unix.time (); id = uuid}
             
   let compare_ts l r =
     compare l.ts r.ts

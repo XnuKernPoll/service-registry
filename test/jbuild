@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(executable
+ ((name test_sr )
+  (libraries  (service-registry oUnit) )))
+
+(alias
+ ((name runtest)
+  (package service-registry)
+  (action (run ${exe:test_sr.exe}))))

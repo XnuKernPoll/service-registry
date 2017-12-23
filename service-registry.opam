@@ -13,6 +13,7 @@ build: [
 ]
 depends: [
   "jbuilder" {build}
+  "ounit" {test}
   "irmin-unix"
   "batteries"
   "cmdliner"
