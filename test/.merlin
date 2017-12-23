@@ -1,5 +1,6 @@
 B ../_build/default/lib
-FLG -open Service_registry -w -40
+B ../_build/default/test
+FLG -w -40
 PKG astring
 PKG base
 PKG base.caml
@@ -41,6 +42,8 @@ PKG mstruct
 PKG nocrypto
 PKG num
 PKG num.core
+PKG oUnit
+PKG oUnit.advanced
 PKG ocamlgraph
 PKG ocplib-endian
 PKG ocplib-endian.bigstring
@@ -63,3 +66,4 @@ PKG uuidm
 PKG uutf
 PKG webmachine
 PKG zarith
+S ../lib

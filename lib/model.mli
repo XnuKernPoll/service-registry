@@ -16,8 +16,8 @@ end
 (*val cat_path: string -> string list *)
 
 (*server_set DataType Ops*)       
-module ServerSet: sig
-  include Irmin.Contents.S
+module ServerSet : sig
+  include Irmin.Contents.S with type t = service list
   val lookup: t -> string -> service option 
   val rm_service: t -> string -> t
   val add_service: t-> service -> t

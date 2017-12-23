@@ -51,18 +51,14 @@ module ServerSet = struct
   let merge = Irmin.Merge.default (server_set_t) |> Irmin.Merge.option
                                             
   let filter_id ss id =
-    List.filter (fun x -> x.id == id) ss
+    List.filter (fun x -> x.id = id) ss
                 
   let lookup ss id =
-    let results = filter_id ss id in
-    if (List.length results) >= 1 then
-      let sorted = List.sort (Service.compare_ts) results |> List.rev in
-      Some (List.hd sorted)
-    else
-      None
-
+    try Some (List.find (fun x -> x.id = id) ss)
+    with Not_found -> None
+    
   let rm_service ss id =
-    List.filter (fun x -> x.id != id) ss
+    List.filter (fun x -> x.id <> id) ss
 
   let add_service ss svc =
     ss @ [svc]
