@@ -15,7 +15,7 @@ let sample_ss =
     ) in
   
   let hosts = List.map (fun x -> f x) range in
-  List.map ( fun (host, uuid) -> Service.make host port uuid ) hosts 
+  List.map ( fun (host, uuid) -> Service.make host port ~uid:uuid () ) hosts 
   
 let existance_cond ss id =
   List.exists (fun x -> x.id = id) ss 
@@ -32,7 +32,7 @@ let removal ctx =
   assert_bool "service removal test failed" b
 
 let addition ctx =
-  let svc = Service.make "192.168.1.20" port "11" in
+  let svc = Service.make "192.168.1.20" port ~uid:"11" () in
   let new_ss = ServerSet.add_service sample_ss svc in
   let b = existance_cond new_ss "11" in
   assert_bool "addition test failed" b 

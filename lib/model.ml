@@ -25,11 +25,13 @@ module Service = struct
              
   let t = service_t
 
-  let make host port =
-    let uuid = Uuidm.to_string (Uuidm.v `V4) in 
-    {address = host; port = Int32.of_int port; ts = Unix.time (); id = uuid}
+  let make host port ?uid () =
 
-  let make host port uuid =
+    let uuid = match uid with
+      | Some x -> x
+      | None -> Uuidm.to_string (Uuidm.v `V4)
+    in 
+
     {address = host; port = Int32.of_int port; ts = Unix.time (); id = uuid}
             
   let compare_ts l r =

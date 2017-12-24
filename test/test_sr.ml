@@ -1,2 +1,6 @@
 open OUnit2
-let () = run_test_tt_main Model_test.suite 
+
+let suite =
+  "Service Registry Tests" >:::
+    [ Model_test.suite; Db_test.suite;]   
+let () = run_test_tt_main suite

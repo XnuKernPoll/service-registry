@@ -9,6 +9,12 @@ module DataStore = Irmin_unix.Git.FS.KV(ServerSet)
 let info fmt =
   Irmin_unix.info fmt
 
+
+let list_files p =
+  let cpath = p ^ "/catalog" in
+  let l = Array.to_list (Sys.readdir p) in
+  Lwt.return l 
+                  
                   
 let ss_removal_event ssid = Fmt.strf "server set %s removed" ssid
 

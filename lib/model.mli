@@ -9,8 +9,7 @@ module Service : sig
   val t: service Irmin.Type.t
   val compare_ts: service -> service -> int
   val compare_id: service -> service -> int
-  val make: string -> int -> service
-  val make: string -> int -> string -> service                                         
+  val make: string -> int -> ?uid:string -> unit -> service                                         
 end 
 
 (*val cat_path: string -> string list *)

@@ -11,15 +11,10 @@ let config r = Irmin_git.config ~bare:true r
 let last l =
   let i = List.length l - 1 in
   List.nth l i
-           
-let list_files p =
-  let l = Array.to_list (Sys.readdir p) in
-  Lwt.return l 
-             
-                
+                           
 let rec removal_proc root iv time_out t =
   Lwt_unix.sleep iv >>= fun () -> 
-  list_files root >>= fun ssids ->
+  list_files root  >>= fun ssids ->
   Lwt_list.iter_p (
       fun x ->
       rm_stale t x time_out >>= fun ss ->

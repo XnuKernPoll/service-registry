@@ -7,4 +7,4 @@
 (alias
  ((name runtest)
   (package service-registry)
-  (action (run ${exe:test_sr.exe}))))
+  (action (run ${exe:test_sr.exe} -runner sequential))))
