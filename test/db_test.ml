@@ -6,7 +6,7 @@ open Service_registry.DB
        
 let fs_root = "/tmp/service-registry"
 let config = Irmin_git.config ~bare:true fs_root
-let repo = DataStore.Repo.v config >>= DataStore.master
+let repo = Lwt_main.run ( DataStore.Repo.v config >>= DataStore.master )
 
 let sample_service =
   Service.make "192.168.1.10" 8080 ()
@@ -18,8 +18,7 @@ let list_in_repo root =
 let ssid = "mysql"
              
 let create_server_set ctx = 
-  repo >>= fun t ->
-  mk_server_set t ssid >>= fun s ->
+  mk_server_set repo ssid >>= fun s ->
   list_in_repo fs_root >>= fun keys ->
   let b = String.exists keys ssid in
   assert_bool "server set creation test failed" b;
@@ -27,9 +26,8 @@ let create_server_set ctx =
   
                                          
 let add_and_lookup ctx  = 
-  repo >>= fun t ->
-  add_service t ssid sample_service >>= fun x ->
-  lookup t ssid sample_service.id >>= fun svco ->
+  add_service repo ssid sample_service >>= fun x ->
+  lookup repo ssid sample_service.id >>= fun svco ->
   let b =  Option.is_some svco in
   assert_bool "either addition or the lookup function is faulty" b;
   Lwt.return_unit
@@ -37,23 +35,18 @@ let add_and_lookup ctx  =
                            
                                        
 let member_listing ctx = 
-  repo >>= fun t ->
-  list_members t ssid >>= fun ss ->
+  list_members repo ssid >>= fun ss ->
   let b = List.length ss > 0 in
   Lwt.return ( assert_bool "membership listing test failed" b )
 
-                          
-
-                                      
+                                                                
 
 let update_test ctx = 
-  repo >>= fun t ->
   let nh = "192.168.1.11" in
   let ns = {sample_service with address = nh;} in
   
-  update_service t ssid ns >>= fun _ ->
-  lookup t ssid ns.id >>= fun svco ->
-
+  update_service repo ssid ns >>= fun _ ->
+  lookup repo ssid ns.id >>= fun svco ->
   match svco with
   | Some svc ->
      let b = svc.address = nh in
@@ -62,7 +55,41 @@ let update_test ctx =
   | None -> Lwt.return ( assert_bool "update_test failed" false )
                         
   
-    
+let add_and_remove ctx =
+  let ssvc = Service.make "192.168.1.12" 3663 () in
+  add_service repo ssid ssvc >>= fun _ ->
+  rm_service repo ssid ssvc.id >>= fun _ ->
+  lookup repo ssid ssvc.id >>= fun o ->
+
+  match o with
+  | Some x ->
+     Lwt.return ( assert_failure "the service wasn't removed" )                
+  | None ->
+     Lwt.return_unit
+
+let refresh_and_lookup ctx =
+  Lwt_unix.sleep 2.0 >>= fun () -> 
+  refresh repo ssid sample_service.id >>= fun _ ->
+  lookup repo ssid sample_service.id >>= fun o ->
+
+  match o with
+  | Some svc ->
+     let b = sample_service.ts <> svc.ts in
+     assert_bool "time stamp was not updated" b;
+     Lwt.return_unit
+       
+  | None ->
+     assert_failure "no such svc";
+     Lwt.return_unit
+
+let ss_deletion ctx =
+  rm_server_set repo ssid >>= fun _ ->
+  list_in_repo fs_root >>= fun s ->
+  let b = String.exists s ssid != true in
+  assert_bool "deletion of server set failed" b;
+  Lwt.return_unit
+  
+       
 let run f ctxt = Lwt_main.run (f ctxt)
                              
 let suite =
@@ -71,6 +98,10 @@ let suite =
       "serverset creation" >:: run create_server_set;
       "add and lookup service" >:: run add_and_lookup;
       "server set membership listing" >:: run member_listing;
+      "update test" >:: run update_test;
+      "add and remove test" >:: run add_and_remove;
+      "refresh and lookup" >:: run refresh_and_lookup;
+      "Server Set deletion" >:: run ss_deletion;
     ]
                                          
                   

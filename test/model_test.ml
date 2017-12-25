@@ -35,13 +35,37 @@ let addition ctx =
   let svc = Service.make "192.168.1.20" port ~uid:"11" () in
   let new_ss = ServerSet.add_service sample_ss svc in
   let b = existance_cond new_ss "11" in
-  assert_bool "addition test failed" b 
-            
+  assert_bool "addition test failed" b
+
+
+let update ctx =
+  let svc = List.nth sample_ss 2 in
+  let nsvc = {svc with port = (Int32.of_int 8090);} in
+  let nss = ServerSet.update_service sample_ss nsvc in
+  let b =
+    match ( ServerSet.lookup nss svc.id ) with
+    | Some x -> x.port != svc.port
+    | None -> false
+  in
+  assert_bool "update test failed" b
+
+let refresh_test ctx =
+  Unix.sleep 2; 
+  let svc = List.nth sample_ss 2 in
+  let o = ServerSet.refresh sample_ss svc.id in
+  match o with
+  | Some x ->
+     let b = x.ts <> svc.ts in
+     assert_bool "model refresh failed" b
+  | None -> assert_failure "couldn't locate service with id"
+  
   
 let suite =
   "ServerSet suite" >:::
     ["lookup test" >:: lookup;
      "removal test" >:: removal;
-     "addition test" >:: addition
+     "addition test" >:: addition;
+     "refresh service test" >:: refresh_test;
+     "update test" >:: update;      
     ]
   
