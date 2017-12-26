@@ -71,7 +71,7 @@ let continue_if_deserialized o f =
   | None ->
      Server.respond_string ~status:`Bad_request ~body:"unable to unmarshal data" ()
 
-let handle_watch t ssid watches =
+let add_watcher watches ssid =
   Watches.add_watcher watches ssid 
   
 let basic_handler t w conn req body =
@@ -83,13 +83,18 @@ let basic_handler t w conn req body =
   | (`GET, ["catalog"; ssid]) ->  list_services t ssid
   | (`GET, ["catalog"; ssid; id]) -> lookup t ssid id
   | (`DELETE, ["catalog"; ssid]) -> remove_server_set t ssid
+                                                      
   | (`PUT, ["catalog"; ssid]) ->
+     Watches.register_watch t ssid w >>= fun _ ->
      create_server_set t ssid
 
   | (`DELETE, ["catalog"; ssid; id]) -> leave t ssid id
+
   | (`POST, ["catalog"; ssid]) ->
      Cohttp_lwt_body.to_string body >>= fun s ->
      let o = Irmin.Type.decode_json service_t (Jsonm.decoder (`String s) ) |> res_opt  in
      continue_if_deserialized o (register t ssid)
+
   | (`POST, ["catalog"; ssid; id]) -> handle_beat t ssid id    
-  
+
+  | (`GET, ["watch"; ssid]) -> add_watcher w ssid 
