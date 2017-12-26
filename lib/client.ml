@@ -5,6 +5,8 @@ open Model
 module Client = Cohttp_lwt_unix.Client        
 type host_port = {host: string; port: int option}
 
+type watch_session = {mutable ss: server_set ; mu: Lwt_mutex.t}
+                  
 let dp = 6423
            
 let get_port hp =
@@ -76,4 +78,22 @@ let remove_server_set host ?port:(port=dp) ssid =
   Client.delete url >|= fun (rep, body) -> ()    
    
 
-                                          
+let rec watch host ?port:(port=dp) ssid sess =
+  let path = Fmt.strf "watch/%s" ssid in 
+  let url = Uri.make ~scheme:"http" ~host ~port ~path () in
+  Client.get url >>= fun (_, body) ->
+  body |> Cohttp_lwt_body.to_string >>= fun s ->
+  let ss = ServerSet.of_string s |> res_opt in
+
+  match ss with
+  | Some svc_set ->
+     Lwt_mutex.lock sess.mu >>= fun () ->
+     sess.ss <- svc_set;
+     Lwt_mutex.unlock sess.mu;
+     watch host ~port ssid sess
+  | None ->
+     watch host ~port ssid sess
+  
+  
+let make_session =
+  {ss = []; mu = (Lwt_mutex.create () );}
