@@ -25,8 +25,8 @@ let svc_path ssid id =
   Fmt.strf "catalog/%s/%s" ssid id
 
 
-let send_beat addr ssid id =
-  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(svc_path ssid id) () in
+let send_beat host ?port:(port=6423) ssid id =
+  let url = Uri.make ~scheme:"http" ~host:host ~port:port ~path:(svc_path ssid id) () in
   Client.post url >>= fun (rep, body) ->
   match Response.status rep with
   | `OK -> Lwt.return_unit
@@ -36,43 +36,43 @@ let send_beat addr ssid id =
   | _ -> Lwt.fail_with "unknown failure"
 
 
-let rec beat_proc addr ssid id i =
-  Lwt_unix.sleep i >>= fun () -> send_beat addr ssid id
-  >>= fun () -> beat_proc addr ssid id i                                                                                                   
+let rec beat_proc host ?port:(port=dp) ssid id i =
+  Lwt_unix.sleep i >>= fun () -> send_beat host ~port ssid id
+  >>= fun () -> beat_proc host ~port ssid id i                                                                                                   
              
-let lookup addr ssid id =
-  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(svc_path ssid id) () in
+let lookup host ?port:(port=dp) ssid id =
+  let url = Uri.make ~scheme:"http" ~host ~port ~path:(svc_path ssid id) () in
   Client.get url >>= fun (rep, body) ->
   body |> Cohttp_lwt_body.to_string >|= fun s ->
   let r = Irmin.Type.decode_json service_t (Jsonm.decoder (`String s)) in
   res_opt r
 
-let list_services addr ssid =
-  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(ss_path ssid) () in
+let list_services host ?port:(port=dp) ssid =
+  let url = Uri.make ~scheme:"http" ~host ~port ~path:(ss_path ssid) () in
   Client.get url >>= fun (rep, body) ->
   body |> Cohttp_lwt_body.to_string >>= fun s ->
   let ss = ServerSet.of_string s |> res_opt in
   Lwt.return ss
              
-let leave addr ssid id =
-  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(svc_path ssid id) () in
+let leave host ?port:(port=dp) ssid id =
+  let url = Uri.make ~scheme:"http" ~host ~port ~path:(svc_path ssid id) () in
   Client.delete url >>= fun (rep, body) -> Lwt.return () 
 
                 
-let register addr ssid ?interval:(i=25.0) svc =
-  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(ss_path ssid) () in
+let register host ?port:(port=dp) ssid ?interval:(i=25.0) svc =
+  let url = Uri.make ~scheme:"http" ~host ~port ~path:(ss_path ssid) () in
   let payload = Fmt.strf "%a\n" (Irmin.Type.pp_json service_t) svc in
   let body = Cohttp_lwt_body.of_string payload in
-  Client.post ~body:body url >|= fun (rep, body) -> Lwt.async ( fun () -> beat_proc addr ssid svc.id i)
+  Client.post ~body:body url >|= fun (rep, body) -> Lwt.async ( fun () -> beat_proc host ~port ssid svc.id i)
                                        
   
-let create_server_set addr ssid =
-  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(ss_path ssid) () in
+let create_server_set host ?port:(port=dp) ssid =
+  let url = Uri.make ~scheme:"http" ~host ~port ~path:(ss_path ssid) () in
   Client.put url >|= fun (rep, body) -> () 
   
 
-let remove_server_set addr ssid =
-  let url = Uri.make ~scheme:"http" ~host:addr.host ~port:(get_port addr) ~path:(ss_path ssid) () in
+let remove_server_set host ?port:(port=dp) ssid =
+  let url = Uri.make ~scheme:"http" ~host ~port ~path:(ss_path ssid) () in
   Client.delete url >|= fun (rep, body) -> ()    
    
 

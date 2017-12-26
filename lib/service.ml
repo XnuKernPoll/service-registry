@@ -71,8 +71,10 @@ let continue_if_deserialized o f =
   | None ->
      Server.respond_string ~status:`Bad_request ~body:"unable to unmarshal data" ()
 
-
-let basic_handler t conn req body =
+let handle_watch t ssid watches =
+  Watches.add_watcher watches ssid 
+  
+let basic_handler t w conn req body =
   let path = Request.uri (req)  |> Uri.path |> path_split in
   let meth = Request.meth(req) in 
 
@@ -81,7 +83,9 @@ let basic_handler t conn req body =
   | (`GET, ["catalog"; ssid]) ->  list_services t ssid
   | (`GET, ["catalog"; ssid; id]) -> lookup t ssid id
   | (`DELETE, ["catalog"; ssid]) -> remove_server_set t ssid
-  | (`PUT, ["catalog"; ssid]) -> create_server_set t ssid
+  | (`PUT, ["catalog"; ssid]) ->
+     create_server_set t ssid
+
   | (`DELETE, ["catalog"; ssid; id]) -> leave t ssid id
   | (`POST, ["catalog"; ssid]) ->
      Cohttp_lwt_body.to_string body >>= fun s ->

@@ -9,6 +9,7 @@ module DataStore = DB.DataStore
   create_server_set -> PUT /catalog/:ssid 
   delete_server_set -> DELETE /catalog/:ssid 
   list_services -> GET /catalog/:ssid 
+  watch -> GET /watch/:ssid
 
  *)
                      
@@ -27,7 +28,7 @@ val list_services: DataStore.t -> string -> (Cohttp.Response.t * Cohttp_lwt_body
 val handle_beat: DataStore.t -> string -> string -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t 
                                                    
 
-val basic_handler: DataStore.t -> Cohttp_lwt_unix.Server.conn -> Cohttp.Request.t -> Cohttp_lwt_body.t -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t
+val basic_handler: DataStore.t -> Watches.watches -> Cohttp_lwt_unix.Server.conn -> Cohttp.Request.t -> Cohttp_lwt_body.t -> (Cohttp.Response.t * Cohttp_lwt_body.t) Lwt.t
 
 
                                                                    

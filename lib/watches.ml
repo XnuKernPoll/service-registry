@@ -64,5 +64,8 @@ let add_watcher watches ssid =
   let nw = w @ [s] in
   Lwt_mutex.lock watches.mu >>= fun () ->
   Hashtbl.replace watches.tbl ssid nw;
-  Lwt.return (Lwt_mutex.unlock watches.mu)
+  Lwt_mutex.unlock watches.mu;
+  let p, _ = s in
+  p
+  
     
