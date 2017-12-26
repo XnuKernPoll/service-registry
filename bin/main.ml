@@ -33,7 +33,6 @@ let root =
    
                  
 let server t =
-  let open Watches in
   let tbl = Hashtbl.create 120 in
   let w = {tbl = tbl; mu = ( Lwt_mutex.create () );} in
   Server.make ~callback:(fun conn req body -> Service.basic_handler t w conn req body) () 
