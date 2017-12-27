@@ -85,8 +85,9 @@ let basic_handler t w conn req body =
   | (`DELETE, ["catalog"; ssid]) -> remove_server_set t ssid
                                                       
   | (`PUT, ["catalog"; ssid]) ->
+     create_server_set t ssid >>= fun (rep, body) ->
      Watches.register_watch t ssid w >>= fun _ ->
-     create_server_set t ssid
+     Lwt.return (rep, body)  
 
   | (`DELETE, ["catalog"; ssid; id]) -> leave t ssid id
 

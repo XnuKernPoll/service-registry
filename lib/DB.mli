@@ -1,8 +1,11 @@
 open Model
        
-module DataStore: Irmin.S with type contents = ServerSet.t
+module DataStore : sig
+  include Irmin.S with type contents = ServerSet.t
+  val init: unit -> unit
+end
 (*store ops*)
-val list_files: string -> (string list) Lwt.t
+val list_server_sets: DataStore.t -> (string list) Lwt.t
                                         
 val cat_path: string -> DataStore.key                            
 val list_members: DataStore.t -> string -> ServerSet.t Lwt.t

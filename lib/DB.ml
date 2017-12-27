@@ -1,20 +1,26 @@
 open Batteries
 open Lwt.Infix
 open Model
-       
-       
-module DataStore = Irmin_unix.Git.FS.KV(ServerSet)
-
+  
+module DataStore = struct
+  include Irmin_unix.Git.FS.KV(ServerSet)
+  let init () = Irmin_unix.set_listen_dir_hook ()
+end 
 (*entertain the idea of having (node, ip, port) as author*)
+
+(*
+let key_from_steps s =
+  Fmt.strf "%a" (DataStore.Key.pp_step s) 
+ *)
+                     
+let list_server_sets t =
+  DataStore.list t ["catalog";] >>= fun nl ->
+  let keys = List.map (fun (s, _) -> s ) nl in
+  Lwt.return keys
+
+
 let info fmt =
   Irmin_unix.info fmt
-
-
-let list_files p =
-  let cpath = p ^ "/catalog" in
-  let l = Array.to_list (Sys.readdir p) in
-  Lwt.return l 
-                  
                   
 let ss_removal_event ssid = Fmt.strf "server set %s removed" ssid
 

@@ -31,14 +31,10 @@ let send_to_watchers watches ssid rep  =
 let callback watches ssid diff =
   match diff with
   | `Added (_, `Contents (v,_ ) ) ->
-     print_endline "Added";
-     print_ss v;
      reply_with_ss v >>= fun rep -> 
      send_to_watchers watches ssid rep
                       
   | `Updated (_, (_, `Contents (v, _) ) ) ->
-     print_endline "updated";
-     print_ss v;
      reply_with_ss v >>= fun rep -> 
      send_to_watchers watches ssid rep
 

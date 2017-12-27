@@ -8,6 +8,11 @@ type host_port = {host: string; port: int option}
 type watch_session = {mutable ss: server_set ; mu: Lwt_mutex.t}
                   
 let dp = 6423
+
+
+let print_ss ss =
+  let fstr = Fmt.strf "%a\n" (ServerSet.pp) ss in
+  print_endline fstr
            
 let get_port hp =
   match hp.port with
@@ -26,6 +31,16 @@ let ss_path ssid =
 let svc_path ssid id =
   Fmt.strf "catalog/%s/%s" ssid id
 
+let add_service host ?port:(port=dp) ssid svc =
+  let url = Uri.make ~scheme:"http" ~host ~port ~path:(ss_path ssid) () in
+  let payload = Fmt.strf "%a\n" (Irmin.Type.pp_json service_t) svc in
+  let body = Cohttp_lwt_body.of_string payload in
+  Client.post ~body:body url >>= fun _ ->
+  Lwt.return_unit
+  
+  
+  
+  
 
 let send_beat host ?port:(port=6423) ssid id =
   let url = Uri.make ~scheme:"http" ~host:host ~port:port ~path:(svc_path ssid id) () in
@@ -38,9 +53,17 @@ let send_beat host ?port:(port=6423) ssid id =
   | _ -> Lwt.fail_with "unknown failure"
 
 
-let rec beat_proc host ?port:(port=dp) ssid id i =
-  Lwt_unix.sleep i >>= fun () -> send_beat host ~port ssid id
-  >>= fun () -> beat_proc host ~port ssid id i                                                                                                   
+let rec beat_proc host ?port:(port=dp) ssid svc i =
+  Lwt_unix.sleep i >>= fun () ->
+  
+  Lwt.catch
+    (fun () -> send_beat host ~port ssid svc.id)
+    (fun e ->
+      let nsvc = {svc with ts = Unix.time ()} in 
+      add_service host ~port ssid nsvc
+    )
+  >>= fun () -> beat_proc host ~port ssid svc i
+  
              
 let lookup host ?port:(port=dp) ssid id =
   let url = Uri.make ~scheme:"http" ~host ~port ~path:(svc_path ssid id) () in
@@ -65,7 +88,7 @@ let register host ?port:(port=dp) ssid ?interval:(i=25.0) svc =
   let url = Uri.make ~scheme:"http" ~host ~port ~path:(ss_path ssid) () in
   let payload = Fmt.strf "%a\n" (Irmin.Type.pp_json service_t) svc in
   let body = Cohttp_lwt_body.of_string payload in
-  Client.post ~body:body url >|= fun (rep, body) -> Lwt.async ( fun () -> beat_proc host ~port ssid svc.id i)
+  Client.post ~body:body url >|= fun (rep, body) -> Lwt.async ( fun () -> beat_proc host ~port ssid svc i)
                                        
   
 let create_server_set host ?port:(port=dp) ssid =
@@ -81,17 +104,17 @@ let remove_server_set host ?port:(port=dp) ssid =
 let rec watch host ?port:(port=dp) ssid sess =
   let path = Fmt.strf "watch/%s" ssid in 
   let url = Uri.make ~scheme:"http" ~host ~port ~path () in
-  Client.get url >>= fun (_, body) ->
+  Client.get url >>= fun (rep, body) ->
   body |> Cohttp_lwt_body.to_string >>= fun s ->
   let ss = ServerSet.of_string s |> res_opt in
-
   match ss with
   | Some svc_set ->
      Lwt_mutex.lock sess.mu >>= fun () ->
      sess.ss <- svc_set;
      Lwt_mutex.unlock sess.mu;
+     print_ss sess.ss; 
      watch host ~port ssid sess
-  | None ->
+  | _ ->
      watch host ~port ssid sess
   
   

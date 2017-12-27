@@ -3,18 +3,17 @@ open DB
 open Lwt.Infix
 open Cohttp_lwt_unix
 open Cmdliner
-       
 
 let config r = Irmin_git.config ~bare:true r
 (* Server.create ~mode:(`TCP (`Port 6423)) *)
-                              
+                          
 let last l =
   let i = List.length l - 1 in
   List.nth l i
                            
 let rec removal_proc root iv time_out t =
   Lwt_unix.sleep iv >>= fun () -> 
-  list_files root  >>= fun ssids ->
+  list_server_sets t >>= fun ssids ->
   Lwt_list.iter_p (
       fun x ->
       rm_stale t x time_out >>= fun ss ->
@@ -35,12 +34,13 @@ let root =
 let server t =
   let open Watches in 
   let tbl = Hashtbl.create 120 in
+  DataStore.init ();
   let w = {tbl = tbl; mu = ( Lwt_mutex.create () );} in
   Server.make ~callback:(fun conn req body -> Service.basic_handler t w conn req body) () 
                               
 let start root port = 
   let conf = config root in
-  DataStore.Repo.v conf >>= DataStore.master >>= fun t ->
+  DataStore.Repo.v conf  >>= DataStore.master >>= fun t -> 
   Server.create ~mode:(`TCP (`Port port)) (server t)
 
 let start_s root port =
@@ -54,4 +54,5 @@ let info =
   let man = [`S Manpage.s_bugs; `P "To report bugs contact me at flatmapds@gmail.com"] in
   Term.info "service-registry" ~version:"%‌%VERSION%%" ~doc ~exits:Term.default_exits ~man
     
-let _ = Term.exit @@ Term.eval (start_t, info)
+let _ =
+  Term.exit @@ Term.eval (start_t, info)
