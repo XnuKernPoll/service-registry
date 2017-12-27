@@ -11,14 +11,14 @@ let last l =
   let i = List.length l - 1 in
   List.nth l i
                            
-let rec removal_proc root iv time_out t =
+let rec removal_proc root iv t =
   Lwt_unix.sleep iv >>= fun () -> 
   list_server_sets t >>= fun ssids ->
   Lwt_list.iter_p (
       fun x ->
-      rm_stale t x time_out >>= fun ss ->
+      rm_stale t x iv >>= fun ss ->
       Lwt.return_unit
-    ) ssids >>= fun () -> removal_proc root iv time_out t 
+    ) ssids >>= fun () -> removal_proc root iv t 
 
                
 let port =
@@ -29,7 +29,10 @@ let port =
 let root =
   let doc = "specifies the root directory for the irmin repo defaults to /tmp/service_registry " in
   Arg.(value & opt string "/tmp/service_registry" & info ["r"; "root"] ~docv:"ROOT" ~doc) 
-   
+
+let timeout =
+  let doc = "the ammount of time since the last heartbeat message was recieved before a service is evicted" in
+  Arg.(value & opt float 60.0 & info ["t"; "timeout"] ~docv:"TIMEOUT" ~doc)
                  
 let server t =
   let open Watches in 
@@ -38,16 +41,16 @@ let server t =
   let w = {tbl = tbl; mu = ( Lwt_mutex.create () );} in
   Server.make ~callback:(fun conn req body -> Service.basic_handler t w conn req body) () 
                               
-let start root port = 
+let start root port iv = 
   let conf = config root in
   DataStore.Repo.v conf  >>= DataStore.master >>= fun t -> 
   Server.create ~mode:(`TCP (`Port port)) (server t)
 
-let start_s root port =
-  Lwt_main.run (start root port)
+let start_s root port timeout =
+  Lwt_main.run (start root port timeout)
                         
 let start_t =
-  Term.(const start_s $ root $ port )
+  Term.(const start_s $ root $ port $ timeout )
 
 let info =
   let doc = "A simple service discovery service" in

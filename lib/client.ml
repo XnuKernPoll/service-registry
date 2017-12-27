@@ -100,8 +100,8 @@ let remove_server_set host ?port:(port=dp) ssid =
   let url = Uri.make ~scheme:"http" ~host ~port ~path:(ss_path ssid) () in
   Client.delete url >|= fun (rep, body) -> ()    
    
-
-let rec watch host ?port:(port=dp) ssid sess =
+(*remember to wrap in async*)
+let rec watch host ?port:(port=dp) ssid sess = 
   let path = Fmt.strf "watch/%s" ssid in 
   let url = Uri.make ~scheme:"http" ~host ~port ~path () in
   Client.get url >>= fun (rep, body) ->
@@ -112,11 +112,10 @@ let rec watch host ?port:(port=dp) ssid sess =
      Lwt_mutex.lock sess.mu >>= fun () ->
      sess.ss <- svc_set;
      Lwt_mutex.unlock sess.mu;
-     print_ss sess.ss; 
      watch host ~port ssid sess
   | _ ->
      watch host ~port ssid sess
-  
+                                                
   
 let make_session =
   {ss = []; mu = (Lwt_mutex.create () );}

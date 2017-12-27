@@ -13,4 +13,4 @@ val register: string -> ?port:int -> string -> ?interval:float -> Service.t  -> 
 val create_server_set: string -> ?port:int -> string -> unit Lwt.t
 val remove_server_set: string -> ?port:int -> string -> unit Lwt.t
                                                              
-val watch: string -> ?port:int -> string -> watch_session -> unit Lwt.t 
+val watch: string -> ?port:int -> string -> watch_session -> unit Lwt.t

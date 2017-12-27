@@ -79,7 +79,7 @@ let refresh_and_lookup ctx =
      Lwt.return_unit
        
   | None ->
-     assert_failure "no such svc";
+     assert_failure "no such svc" ;
      Lwt.return_unit
 
 let ss_deletion ctx =
