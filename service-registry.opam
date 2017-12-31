@@ -5,9 +5,8 @@ authors: ["Samuel Riyad"]
 tags: []
 license: "MIT"
 homepage: "https://github.com/XnuKernPoll/service-registry"
-dev-repo: "https://github.com/XnuKernPoll/service-registry"
-bug-reports: ""
-doc: ""
+dev-repo: "https://github.com/XnuKernPoll/service-registry.git"
+bug-reports: "https://github.com/XnuKernPoll/service-registry/issues"          
 build: [
   [ "jbuilder" "subst" ] {pinned}
   [ "jbuilder" "build" "-p" name "-j" jobs ]
