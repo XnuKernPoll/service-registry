@@ -59,11 +59,10 @@ let rm_server_set t ssid =
     
 let list_members t ssid =
   let path = cat_path ssid in
-  DataStore.find t path >|= fun res ->
+  DataStore.find t path >>= fun res ->
   match res with
-  | Some x -> x
-  | None -> ServerSet.zero
-  
+  | Some x -> Lwt.return x
+  | None -> Lwt.fail_with ( non_existant ssid )
   
     
     
@@ -82,7 +81,7 @@ let add_service t ssid svc =
      >|= fun () -> Fmt.strf "%s was added to server set %s" svc.id ssid
 
   | None ->
-     Lwt.return (non_existant ssid)
+     Lwt.fail_with ( non_existant ssid ) 
     
 
 
@@ -95,7 +94,7 @@ let update_service t ssid svc =
      >|= fun () ->
      Fmt.strf "%s was updated in serverset %s" svc.id ssid 
 
-  | None -> Lwt.return ( non_existant ssid )
+  | None -> Lwt.fail_with ( non_existant ssid )
 
                        
 let rm_service t ssid id =
@@ -107,7 +106,7 @@ let rm_service t ssid id =
      >|= fun () -> Fmt.strf "%s was removed from serverset %s" id ssid
 
   | None ->
-     Lwt.return (non_existant ssid)
+     Lwt.fail_with ( non_existant ssid )
 
                 
 let rm_stale t ssid max =

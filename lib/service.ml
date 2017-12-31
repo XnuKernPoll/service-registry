@@ -15,7 +15,13 @@ let res_opt r =
 let path_split =
   Str.split (Str.regexp "/")
 
-
+let existance_filter rep =
+  Lwt.catch
+    (fun () -> rep)
+    (fun e ->
+      let emsg = Printexc.to_string e in
+      Server.respond_string ~status:`Not_found ~body:emsg ()
+    ) 
             
 let ok_rep body =
   Server.respond_string ~status:`OK ~body:body () 
@@ -80,21 +86,21 @@ let basic_handler t w conn req body =
 
   match (meth, path) with
     
-  | (`GET, ["catalog"; ssid]) ->  list_services t ssid
+  | (`GET, ["catalog"; ssid]) ->  existance_filter (list_services t ssid)
   | (`GET, ["catalog"; ssid; id]) -> lookup t ssid id
   | (`DELETE, ["catalog"; ssid]) -> remove_server_set t ssid
                                                       
   | (`PUT, ["catalog"; ssid]) ->
-     create_server_set t ssid >>= fun (rep, body) ->
+     create_server_set t ssid  >>= fun (rep, body) ->
      Watches.register_watch t ssid w >>= fun _ ->
      Lwt.return (rep, body)  
 
-  | (`DELETE, ["catalog"; ssid; id]) -> leave t ssid id
+  | (`DELETE, ["catalog"; ssid; id]) -> existance_filter (leave t ssid id)
 
   | (`POST, ["catalog"; ssid]) ->
      Cohttp_lwt_body.to_string body >>= fun s ->
      let o = Irmin.Type.decode_json service_t (Jsonm.decoder (`String s) ) |> res_opt  in
-     continue_if_deserialized o (register t ssid)
+     existance_filter ( continue_if_deserialized o ( register t ssid ) )
 
   | (`POST, ["catalog"; ssid; id]) -> handle_beat t ssid id    
 
