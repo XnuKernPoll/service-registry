@@ -20,9 +20,15 @@ module ServerSet : sig
   val lookup: t -> string -> service option 
   val rm_service: t -> string -> t
   val add_service: t-> service -> t
+                                    
   val rm_stale: t -> float -> t
+  (**evicts services that have a time stamp earlier than the given span*)
+
   val update_service: t -> service -> t
+                                        
   val refresh: t -> string -> service option                             
+  (** looks up service id in serverset and updates it's time stamp*)
+                                      
   val zero: t              
 end 
 
