@@ -1,10 +1,11 @@
+version: "0.1.0"
 opam-version: "1.2"
-maintainer: ""
-authors: []
+maintainer: "Samuel Riyad"
+authors: ["Samuel Riyad"]
 tags: []
-license: ""
-homepage: ""
-dev-repo: ""
+license: "MIT"
+homepage: "https://github.com/XnuKernPoll/service-registry"
+dev-repo: "https://github.com/XnuKernPoll/service-registry"
 bug-reports: ""
 doc: ""
 build: [
